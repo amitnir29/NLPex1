@@ -1,0 +1,2 @@
+# NLPex1
+NLP BIU Fall 2020 ex1
