@@ -148,6 +148,7 @@ def tags(i):
 
 active_tags = dict()
 
+f=0
 def Viterbi(sentence):
     global active_tags
     words = sentence.split(" ")
@@ -244,7 +245,11 @@ def Viterbi(sentence):
                 best_last = t
                 best_last_1 = t_1
 
+    if best_last == None or best_last == "*START*":
+        best_last = "O"
     best_tags.append(best_last)
+    if best_last_1 == None or best_last_1 == "*START*":
+        best_last_1 = "O"
     best_tags.append(best_last_1)
 
     # for i in range(n-2,0,-1):
@@ -252,13 +257,25 @@ def Viterbi(sentence):
     #     best_tags.append(v_tags[(i+2),best_tags[i+1],best_tags[i]])
 
     for i, k in enumerate(range(n - 2, 0, -1)):
-        best_tags.append(v_tags[(k + 2, best_tags[i + 1], best_tags[i])])
+        try:
+            if v_tags[(k + 2, best_tags[i + 1], best_tags[i])] ==  None or v_tags[(k + 2, best_tags[i + 1], best_tags[i])] == "*START*":
+                best_tags.append("O")
+            else:
+                best_tags.append(v_tags[(k + 2, best_tags[i + 1], best_tags[i])])
+        except:
+            best_tags.append("O")
+            print(sentence)
+            print()
+            print()
     best_tags.reverse()
+    global f
+    print(f)
+    f+=1
     #
     # tags_list = list()
     # for i in range(0,n):
     #     tags_list.append(best_tags[i])
-    # print(best_tags)
+    #print(sentence)
     return best_tags
 
 

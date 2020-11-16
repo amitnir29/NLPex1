@@ -3,6 +3,7 @@ import sys
 import math
 
 START = '*START*'
+END = '*END*'
 q_counts = dict()
 e_counts = dict()
 possible_tags = set()
@@ -98,7 +99,10 @@ def getQ(t1, t2, t3):
     y = 0.15
     z = 0.05
 
-    p1 = q_counts[t3] / num_words
+    if t3 == END:
+        p1 = 1
+    else:
+        p1 = q_counts[t3] / num_words
     if(t2 == START):
         try:
             p2 = q_counts[t2 + " " + t3]/num_START_words
@@ -180,6 +184,7 @@ def geerdyHMM(sentence):
                     tags[i] = tag
                     p_ti_wi = g_t_wi
 
+
     #print (tags)
     return tags
 
@@ -203,8 +208,9 @@ def main():
         words = sentence.split(" ")
         n = len(words)
         words_tags = ""
-        for i in range(0,n):
+        for i in range(0,n-1):
             words_tags = words_tags + words[i] + "/" + tags[i] + " "
+        words_tags = words_tags + words[n - 1] + "/" + tags[n - 1]
         output_file.write(words_tags+"\n")
 
     output_file.close()
