@@ -3,6 +3,7 @@ import string
 
 START = '*START*'
 NONE = '*NONE*'
+SR_TVAH = 3
 
 def counter(lines):
     count = {}
@@ -36,6 +37,7 @@ def main():
             word, tag = word_and_tag.rsplit('/',1)
             features = tag
             features += " " + "t1=" + ptag
+            features += " " + "t2=" + pptag
             features += " " + "t2t1=" + pptag + "_" + ptag
             pptag = ptag
             ptag = tag
@@ -57,21 +59,23 @@ def main():
                 aword = words_with_tags[i+1].rsplit('/', 1)[0]
                 aaword = words_with_tags[i+2].rsplit('/', 1)[0]
 
-            if ppword != NONE:
-                features += " " + "ppw=" + ppword
+            # if ppword != NONE:
+            #     features += " " + "ppw=" + ppword
             if pword != NONE:
                 features += " " + "pw=" + pword
             if aword != NONE:
                 features += " " + "aw=" + aword
-            if aaword != NONE:
-                features += " " + "aaw=" + aaword
+            # if aaword != NONE:
+            #     features += " " + "aaw=" + aaword
 
 
             # if not rare
-            if word not in rare:
+            # if word not in rare:
+            if True:
                 features += " " + "form=" + word
             # rare
-            else:
+            # else:
+            if True:
                 if any([str(i) in word for i in range(10)]):
                     features += " " + "contNumber=True"
                 else:
@@ -87,10 +91,10 @@ def main():
                 else:
                     features += " " + "contUpper=False"
 
-                for i in range(1, min(4+1, len(word) + 1)):
+                for i in range(1, min(SR_TVAH + 1, len(word) + 1)):
                     end = len(word) - 1
-                    features += " " + "suff" + str(i) + "=" + word[end-i + 1 : end + 1]
-                    features += " " + "pre" + str(i) + "=" + word[0 : i]
+                    features += " " + "suff" + str(i) + "=" + word[end-i + 1 : end + 1].lower()
+                    features += " " + "pre" + str(i) + "=" + word[0 : i].lower()
 
 
 

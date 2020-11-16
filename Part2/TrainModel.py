@@ -1,6 +1,7 @@
 import pickle
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import SGDClassifier
 import sys
 
 MAPPINGFILE = "feature_map_file"
@@ -41,7 +42,9 @@ def main():
     # print(X)
     # print(Y)
 
-    model = LogisticRegression(multi_class="multinomial")
+    model = LogisticRegression(multi_class="multinomial", max_iter=350)
+    # model = SGDClassifier(loss='log')
+
     model = model.fit(X, y_labels)
     #
     pickle.dump(model, open(sys.argv[2], 'wb'))
