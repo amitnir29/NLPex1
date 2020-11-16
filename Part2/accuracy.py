@@ -1,7 +1,6 @@
 import sys
 
 def main():
-    # file1 = open(sys.argv[1], 'r')
     file1 = open("output_file", 'r')
     lines_1 = file1.read().splitlines()
     file1.close()
