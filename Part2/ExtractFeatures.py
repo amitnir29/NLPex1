@@ -3,7 +3,17 @@ import string
 
 START = '*START*'
 NONE = '*NONE*'
-SR_TVAH = 3
+SR_TVAH = 4
+
+suffixes = ["eer", "er", "ion", "ity", "ment", "ness", "or", "sion", "ship", "th",
+            "able", "ible", "al", "ary", "ful", "ic", "ious", "ous", "ive", "less", "y",
+            "ed", "en", "ing", "ize", "ise",
+            "ly", "ward", "wise",
+            "less", "or", "ar", "ist", "al", "ion", "ence", "ment", "ness", "ish", "ify", "ize"]
+
+prefixes = ["anti", "dis", "en", "il", "im", "in", "ir", "mis", "non", "ob", "op", "pre", "un", "re",
+            "auto", "de", "down", "extra", "hyper", "inter", "mega", "mid", "over", "out", "post", "pro",
+            "semi", "sub", "super", "tele", "trans", "ultra", "under", "up"]
 
 def counter(lines):
     count = {}
@@ -36,8 +46,10 @@ def main():
         for i, word_and_tag in enumerate(words_with_tags):
             word, tag = word_and_tag.rsplit('/',1)
             features = tag
+            features += " " + "len=" + str(len(word))
+            # features += " " + "index=" + str(i)
             features += " " + "t1=" + ptag
-            features += " " + "t2=" + pptag
+            # features += " " + "t2=" + pptag
             features += " " + "t2t1=" + pptag + "_" + ptag
             pptag = ptag
             ptag = tag
@@ -59,17 +71,16 @@ def main():
                 aword = words_with_tags[i+1].rsplit('/', 1)[0]
                 aaword = words_with_tags[i+2].rsplit('/', 1)[0]
 
-            # if ppword != NONE:
-            #     features += " " + "ppw=" + ppword
+            if ppword != NONE:
+                features += " " + "ppw=" + ppword
             if pword != NONE:
                 features += " " + "pw=" + pword
             if aword != NONE:
                 features += " " + "aw=" + aword
-            # if aaword != NONE:
-            #     features += " " + "aaw=" + aaword
+            if aaword != NONE:
+                features += " " + "aaw=" + aaword
 
 
-            # if not rare
             # if word not in rare:
             if True:
                 features += " " + "form=" + word
@@ -91,10 +102,19 @@ def main():
                 else:
                     features += " " + "contUpper=False"
 
+                mutual_suff = False
+                mutual_pre = False
                 for i in range(1, min(SR_TVAH + 1, len(word) + 1)):
                     end = len(word) - 1
+                    if word[end-i + 1 : end + 1].lower() in suffixes:
+                        mutual_suff = True
                     features += " " + "suff" + str(i) + "=" + word[end-i + 1 : end + 1].lower()
+                    if word[0 : i].lower() in prefixes:
+                        mutual_pre = True
                     features += " " + "pre" + str(i) + "=" + word[0 : i].lower()
+
+                # features += " " + "mutual_suff=" + str(mutual_suff)
+                # features += " " + "mutual_pre=" + str(mutual_pre)
 
 
 

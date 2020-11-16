@@ -6,9 +6,17 @@ import pickle
 START = '*START*'
 END = '*END*'
 NONE = '*NONE*'
-SR_TVAH = 3
+SR_TVAH = 4
 
+suffixes = ["eer", "er", "ion", "ity", "ment", "ness", "or", "sion", "ship", "th",
+            "able", "ible", "al", "ary", "ful", "ic", "ious", "ous", "ive", "less", "y",
+            "ed", "en", "ing", "ize", "ise",
+            "ly", "ward", "wise",
+            "less", "or", "ar", "ist", "al", "ion", "ence", "ment", "ness", "ish", "ify", "ize"]
 
+prefixes = ["anti", "dis", "en", "il", "im", "in", "ir", "mis", "non", "ob", "op", "pre", "un", "re",
+            "auto", "de", "down", "extra", "hyper", "inter", "mega", "mid", "over", "out", "post", "pro",
+            "semi", "sub", "super", "tele", "trans", "ultra", "under", "up"]
 
 
 
@@ -69,17 +77,24 @@ def main():
             t1 = lines[line_index][column_index - 1][2]
             t2t1 = lines[line_index][column_index - 2][2] + "_" + t1
             t2 = lines[line_index][column_index - 2][2]
+            # features["index"] = str(column_index - 2)
             if pword != NONE:
-                features["pword"] = pword
-            # if ppword != NONE:
-            #     features["ppword"] = ppword
+                features["pw"] = pword
+            if ppword != NONE:
+                features["ppw"] = ppword
             if aword != NONE:
-                features["aword"] = aword
-            # if aaword != NONE:
-            #     features["aaword"] = aaword
+                features["aw"] = aword
+            if aaword != NONE:
+                features["aaw"] = aaword
+            features["len"] = str(len(word))
             features["t1"] = t1
-            features["t2"] = t2
+            # features["t2"] = t2
             features["t2t1"] = t2t1
+
+            # if word in rare:
+            #     features["israre"] = "True"
+            # else:
+            #     features["israre"] = "False"
 
             # if not rare
             # if word not in rare:
@@ -104,10 +119,18 @@ def main():
                 else:
                     features["contUpper"] = "False"
 
+                mutual_suff = False
+                mutual_pre = False
                 for i in range(1, min(SR_TVAH + 1, len(word) + 1)):
                     end = len(word) - 1
+                    if word[end - i + 1: end + 1].lower() in suffixes:
+                        mutual_suff = True
                     features["suff" + str(i)] = word[end - i + 1: end + 1].lower()
+                    if word[0: i].lower() in prefixes:
+                        mutual_pre = True
                     features["pre" + str(i)] = word[0: i].lower()
+                # features["mutual_suff"] = str(mutual_suff)
+                # features["mutual_pre"] = str(mutual_pre)
 
             # lines[line_index][column_index][1] = features
             dict_list.append(features)
@@ -120,117 +143,9 @@ def main():
                 continue
             lines[i][column_index][2] = tag
 
-    # print(lines)
     with open(sys.argv[4], 'w') as output_file:
         for line in lines:
             output_file.write(" ".join([triplet[0]+"/"+triplet[2] for triplet in line[2:-2]]) + "\n")
-
-
-
-
-
-
-    '''
-    for line in train_data:
-        ptag = START
-        pptag = START
-
-        new_line = True
-
-        words = line.split(' ')
-        for i, word in enumerate(words):
-
-            # features = tag
-            features = "t1=" + ptag
-            # features = "t2=" + pptag
-            features += " " + "t2t1=" + pptag + "_" + ptag
-            # pptag = ptag
-            # ptag = tag
-
-            pword, ppword, aword, aaword = NONE, NONE, NONE, NONE
-            if i == 0:
-                pass
-            elif i == 1:
-                pword = words[0]
-            else:
-                pword = words[i-1]
-                ppword = words[i-2]
-
-            if i == len(words) - 2:
-                aword = words[len(words) - 1]
-            elif i == len(words) - 1:
-                pass
-            else:
-                aword = words[i+1]
-                aaword = words[i+2]
-
-            # if ppword != NONE:
-            #     features += " " + "ppw=" + ppword
-            if pword != NONE:
-                features += " " + "pw=" + pword
-            if aword != NONE:
-                features += " " + "aw=" + aword
-            # if aaword != NONE:
-                # features += " " + "aaw=" + aaword
-
-
-            # if not rare
-            if word not in rare:
-                # pass
-                features += " " + "form=" + word
-            # rare
-            else:
-                if any([str(i) in word for i in range(10)]):
-                    features += " " + "contNumber=True"
-                else:
-                    features += " " + "contNumber=False"
-
-                if '-' in word:
-                    features += " " + "contHyphen=True"
-                else:
-                    features += " " + "contHyphen=False"
-
-                if any([letter in word for letter in string.ascii_uppercase]):
-                    features += " " + "contUpper=True"
-                else:
-                    features += " " + "contUpper=False"
-
-                for i in range(1, min(SR_TVAH+1, len(word) + 1)):
-                    end = len(word) - 1
-                    features += " " + "suff" + str(i) + "=" + word[end-i + 1 : end + 1]
-                    features += " " + "pre" + str(i) + "=" + word[0 : i]
-
-            x_line_dict = {}
-            x_line = features
-            for key_and_value in x_line.split(' '):
-                # print(key_and_value)
-                key, value = key_and_value.split('=', 1)
-                x_line_dict[key] = value
-            # print(x_line_dict)
-            X = dv.transform(x_line_dict)
-
-            # print(X[0])
-
-            tag = model.predict(X)[0]
-            to_write = word + "/" + tag
-            if new_line:
-                output_file.write(to_write)
-            else:
-                # output_file.write(" ")
-                output_file.write(" " + to_write)
-            # break
-
-            pptag = ptag
-            ptag = tag
-
-            new_line = False
-
-        output_file.write("\n")
-'''
-
-
-
-
 
 
 
